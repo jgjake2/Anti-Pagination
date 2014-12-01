@@ -1,3 +1,6 @@
+// +@typename         cracked_com_article
+// +@include          http://www.cracked.com/article_*
+// +@history          (0.0.1) Initial Release
 
 pageTypes.add('cracked_com_article', {
 	test: function(currentURL){
@@ -31,8 +34,8 @@ pageTypes.add('cracked_com_article', {
 		$('#safePlace .body > section:first').addClass('AntiPagination_currentPage');
 		return $('#safePlace .body > section:first');
 	},
-	getPageContent: function(currentURL, currentPageNumber, contentPageNumber){
-		console.log('getPageContent', currentPageNumber, contentPageNumber);
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+		//console.log('getPageContent', currentPageNumber, contentPageNumber);
 		var urlHTMLPatt = /((?:_p\d+)?\.html)\s*$/gi;
 		
 		var newURL = currentURL.replace(urlHTMLPatt, "_p" + contentPageNumber + ".html");

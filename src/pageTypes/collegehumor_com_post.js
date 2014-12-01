@@ -1,3 +1,6 @@
+// +@typename         collegehumor_com_post
+// +@include          http://www.collegehumor.com/post/*
+// +@history          (0.0.1) Initial Release
 
 pageTypes.add('collegehumor_com_post', {
 	test: function(currentURL){
@@ -45,7 +48,7 @@ pageTypes.add('collegehumor_com_post', {
 		$('.post-content').addClass('AntiPagination_currentPage');
 		return $('.post-content');
 	},
-	getPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
 		//console.log('getPageContent', currentPageNumber, contentPageNumber);
 		var urlHTMLPatt = /(?:\/page\:\d+|\/){1}?$/gi;
 		

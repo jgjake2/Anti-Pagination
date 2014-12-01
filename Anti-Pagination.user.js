@@ -5,22 +5,28 @@
 // @author           jgjake2
 // @downloadURL      http://myuserjs.org/script/jgjake2/Anti-Pagination.user.js
 // @updateURL        http://myuserjs.org/script/jgjake2/Anti-Pagination.meta.js
+// @include          http://www.collegehumor.com/post/*
 // @include          http://www.cracked.com/article_*
 // @include          http://www.cracked.com/blog/*
-// @include          http://www.collegehumor.com/post/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-// @require          http://myuserjs.org/API/MUJS.js/0.0.3
-// @version          0.0.5
-// @history          (0.0.5) Update API Version
-// @history          (0.0.4) Upload to GitHub
-// @history          (0.0.3) Clean Up code
-// @history          (0.0.2) MUJS API Fixes
-// @history          (0.0.1) Initial Release
+// @require          http://test2.myuserjs.org/API/MUJS.js/0.0.5
+// @version          0.0.7
+// @history          (0.0.7)(main)                  Added script_info options to MUJS updates
+// @history          (0.0.6)(main)                  Added includes/excludes to build process
+// @history          (0.0.5)(main)                  Update API Version
+// @history          (0.0.4)(main)                  Upload to GitHub
+// @history          (0.0.3)(main)                  Clean Up code
+// @history          (0.0.2)(main)                  MUJS API Fixes
+// @history          (0.0.1)(cracked_com_article)   Initial Release
+// @history          (0.0.1)(cracked_com_blog)      Initial Release
+// @history          (0.0.1)(collegehumor_com_post) Initial Release
+// @history          (0.0.1)(main)                  Initial Release
 // @grant            unsafeWindow
+// @grant            GM_info
+// @grant            GM_getMetadata
+// @grant            GM_xmlhttpRequest
 // @noframes
 // ==/UserScript==
-//if (window.top != window.self) return;
-//console.log('MUJS', MUJS);
 
 MUJS.config('script.username', 'jgjake2');
 MUJS.config('script.script_name', 'Anti-Pagination');
@@ -32,6 +38,31 @@ var scriptLoadTime = -1;
 var updateCallback = function(result){
 	console.log('updateCallback ', result);
 }
+
+var script_info = {};
+
+if(typeof GM_info !== "undefined" && typeof GM_info.scriptHandler !== "undefined" && GM_info.scriptHandler == 'Tampermonkey'){
+	script_info = GM_info.script;
+	script_info.script_handler = 'Tampermonkey';
+	script_info.script_handler_version = GM_info.version;
+} else if(typeof GM_info !== "undefined"){
+	script_info = GM_info.script;
+	script_info.script_handler = 'Greasemonkey';
+	script_info.script_handler_version = GM_info.version;
+} else if(typeof GM_getMetadata !== "undefined"){
+	script_info.script_handler = 'Scriptish';
+	/*
+	
+	...Fuck Scriptish
+	
+	script_info = GM_getMetadata() || {};
+	//script_info.version = GM_getMetadata('version');
+	console.log('GM_getMetadata', script_info);
+	*/
+}
+
+MUJS.config('Update.script_info', script_info);
+console.log('script_info', script_info);
 
 function getMUJSUpdate(){
 	var opts = {
@@ -125,7 +156,7 @@ $(document).ready(function() {
 			if(typeof this.currentPageType !== "undefined" && this.currentPageNumber > -1 && this.maxNumberOfPages > -1){
 					for(var i = 1; i <= this.maxNumberOfPages; i++){
 						if(i != this.currentPageNumber){
-							this.types[this.currentPageType].getPageContent(currentURL, this.currentPageNumber, i);
+							this.types[this.currentPageType].addPageContent(currentURL, this.currentPageNumber, i);
 						}
 					}
 			}
@@ -143,7 +174,6 @@ $(document).ready(function() {
 		
 	};
 
-	
 pageTypes.add('collegehumor_com_post', {
 	test: function(currentURL){
 		// Test URL
@@ -190,7 +220,7 @@ pageTypes.add('collegehumor_com_post', {
 		$('.post-content').addClass('AntiPagination_currentPage');
 		return $('.post-content');
 	},
-	getPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
 		//console.log('getPageContent', currentPageNumber, contentPageNumber);
 		var urlHTMLPatt = /(?:\/page\:\d+|\/){1}?$/gi;
 		
@@ -241,8 +271,8 @@ pageTypes.add('cracked_com_article', {
 		$('#safePlace .body > section:first').addClass('AntiPagination_currentPage');
 		return $('#safePlace .body > section:first');
 	},
-	getPageContent: function(currentURL, currentPageNumber, contentPageNumber){
-		console.log('getPageContent', currentPageNumber, contentPageNumber);
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+		//console.log('getPageContent', currentPageNumber, contentPageNumber);
 		var urlHTMLPatt = /((?:_p\d+)?\.html)\s*$/gi;
 		
 		var newURL = currentURL.replace(urlHTMLPatt, "_p" + contentPageNumber + ".html");
@@ -294,8 +324,8 @@ pageTypes.add('cracked_com_blog', {
 		$('#safePlace .body > section:first').addClass('AntiPagination_currentPage');
 		return $('#safePlace .body > section:first');
 	},
-	getPageContent: function(currentURL, currentPageNumber, contentPageNumber){
-		console.log('getPageContent', currentPageNumber, contentPageNumber);
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+		//console.log('getPageContent', currentPageNumber, contentPageNumber);
 		var urlHTMLPatt = /((?:_p\d+)?\/)\s*$/gi;
 		
 		var newURL = currentURL.replace(urlHTMLPatt, "_p" + contentPageNumber + "/");
