@@ -9,8 +9,9 @@
 // @include          http://www.cracked.com/blog/*
 // @include          http://www.collegehumor.com/post/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-// @require          http://myuserjs.org/API/MUJS.js/0.0.2
-// @version          0.0.4
+// @require          http://myuserjs.org/API/MUJS.js/0.0.3
+// @version          0.0.5
+// @history          (0.0.5) Update API Version
 // @history          (0.0.4) Upload to GitHub
 // @history          (0.0.3) Clean Up code
 // @history          (0.0.2) MUJS API Fixes
