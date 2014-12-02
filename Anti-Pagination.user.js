@@ -5,12 +5,14 @@
 // @author           jgjake2
 // @downloadURL      http://myuserjs.org/script/jgjake2/Anti-Pagination.user.js
 // @updateURL        http://myuserjs.org/script/jgjake2/Anti-Pagination.meta.js
+// @homepage         http://myuserjs.org/script/jgjake2/Anti-Pagination
 // @include          http://www.collegehumor.com/post/*
 // @include          http://www.cracked.com/article_*
 // @include          http://www.cracked.com/blog/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          http://test2.myuserjs.org/API/MUJS.js/0.0.5
-// @version          0.0.7
+// @version          0.0.8
+// @history          (0.0.8)(main)                  Added Homepage and ReadMe updates
 // @history          (0.0.7)(main)                  Added script_info options to MUJS updates
 // @history          (0.0.6)(main)                  Added includes/excludes to build process
 // @history          (0.0.5)(main)                  Update API Version
@@ -19,8 +21,8 @@
 // @history          (0.0.2)(main)                  MUJS API Fixes
 // @history          (0.0.1)(cracked_com_article)   Initial Release
 // @history          (0.0.1)(cracked_com_blog)      Initial Release
-// @history          (0.0.1)(collegehumor_com_post) Initial Release
 // @history          (0.0.1)(main)                  Initial Release
+// @history          (0.0.1)(collegehumor_com_post) Initial Release
 // @grant            unsafeWindow
 // @grant            GM_info
 // @grant            GM_getMetadata

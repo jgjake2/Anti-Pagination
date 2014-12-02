@@ -5,12 +5,14 @@
 // @author           jgjake2
 // @downloadURL      http://myuserjs.org/script/jgjake2/Anti-Pagination.user.js
 // @updateURL        http://myuserjs.org/script/jgjake2/Anti-Pagination.meta.js
+// @homepage         http://myuserjs.org/script/jgjake2/Anti-Pagination
 {{{INCLUDES}}}
 {{{EXCLUDES}}}
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          http://test2.myuserjs.org/API/MUJS.js/0.0.5
 {{{REQUIRES}}}
-// @version          0.0.6
+// @version          0.0.8
+// @history          (0.0.8) Added Homepage and ReadMe updates
 // @history          (0.0.7) Added script_info options to MUJS updates
 // @history          (0.0.6) Added includes/excludes to build process
 // @history          (0.0.5) Update API Version
