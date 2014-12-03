@@ -11,14 +11,14 @@
 // @include          http://www.cracked.com/blog/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js
-// @require          http://test2.myuserjs.org/API/0.0.5/MUJS.js
+// @require          http://myuserjs.org/API/0.0.5/MUJS.js
 // @version          0.0.9
 // @history          (0.0.9)(cracked_com_article)   Removed bottom banner on pages
+// @history          (0.0.9)(cracked_com_blog)      Removed bottom banner on pages
 // @history          (0.0.9)(main)                  Started outlining settings
 // @history          (0.0.9)(main)                  API Update
 // @history          (0.0.9)(main)                  Major code improvements
 // @history          (0.0.9)(main)                  Updated Comments
-// @history          (0.0.9)(cracked_com_blog)      Removed bottom banner on pages
 // @history          (0.0.8)(main)                  Added Homepage and ReadMe updates
 // @history          (0.0.7)(main)                  Added script_info options to MUJS updates
 // @history          (0.0.6)(main)                  Added includes/excludes to build process
@@ -26,10 +26,10 @@
 // @history          (0.0.4)(main)                  Upload to GitHub
 // @history          (0.0.3)(main)                  Clean Up code
 // @history          (0.0.2)(main)                  MUJS API Fixes
-// @history          (0.0.1)(collegehumor_com_post) Initial Release
 // @history          (0.0.1)(cracked_com_article)   Initial Release
-// @history          (0.0.1)(main)                  Initial Release
 // @history          (0.0.1)(cracked_com_blog)      Initial Release
+// @history          (0.0.1)(collegehumor_com_post) Initial Release
+// @history          (0.0.1)(main)                  Initial Release
 // @grant            unsafeWindow
 // @grant            GM_info
 // @grant            GM_log
@@ -41,7 +41,7 @@
 MUJS.config("script.username","jgjake2");MUJS.config("script.script_name","Anti-Pagination");MUJS.config("Update.getType","data");MUJS.config("Update.DOMTiming",true);var scriptLoadTime=-1;var script_info={};
 if(typeof GM_info!=="undefined"&&typeof GM_info.scriptHandler!=="undefined"&&GM_info.scriptHandler=="Tampermonkey"){script_info=GM_info.script;script_info.script_handler="Tampermonkey";script_info.script_handler_version=GM_info.version}else if(typeof GM_info!=="undefined"){script_info=GM_info.script;script_info.script_handler="Greasemonkey";script_info.script_handler_version=GM_info.version}else if(typeof GM_getMetadata!=="undefined")script_info.script_handler="Scriptish";
 MUJS.config("Update.script_info",script_info);console.log("script_info",script_info);var updateCallback=function(result){console.log("updateCallback ",result)};function getMUJSUpdate(){var opts={callback:updateCallback,getType:"data",args:{}};if(scriptLoadTime>-1)opts.args.scriptLoadTime=scriptLoadTime;MUJS.UPDATE.getUpdateData(opts)}try{function openSettings(){unsafeWindow.AntiPagination.settings.show()}GM_registerMenuCommand("Anti-Pagination Settings",openSettings,"a")}catch(e){}var head=document.head;
-var bs=document.createElement("link");bs.type="text/css";bs.rel="stylesheet";bs.href="https://raw.githubusercontent.com/jgjake2/Anti-Pagination/master/tw-bs.3.1.1.css";head.appendChild(bs);
+var bs=document.createElement("link");bs.type="text/css";bs.rel="stylesheet";bs.href="http://myuserjs.org/resource/jgjake2/Anti-Pagination/tw-bs.3.1.1.css";head.appendChild(bs);
 $(document).ready(function(){function PageTypeClass(data){return $.extend({name:undefined,init:function(currentURL,currentPageNumber,maxNumberOfPages){},test:function(currentURL){},getCurrentPageNumber:function(currentURL){},getgetMaxNumberOfPages:function(currentURL){},getCurrentPageContent:function(currentURL){},addPageContent:function(currentURL,currentPageNumber,contentPageNumber){},onContentAdded:function(contentPageNumber,$content){},onAllPagesAdded:function(contentPageNumber,$content){}},data)}
 var AntiPagination={pageTypes:{},currentPageType:undefined,currentPageNumber:-1,maxNumberOfPages:-1,numPagesAdded:0,currentURL:window.location.href,init:function(){this.currentPageType=this.getPageType();if(typeof this.currentPageType!=="undefined"){this.currentPageNumber=this.callMethod("getCurrentPageNumber",this.currentPageType,this.currentURL);this.maxNumberOfPages=this.callMethod("getMaxNumberOfPages",this.currentPageType,this.currentURL);this.callMethod("init",this.currentPageType,this.currentURL,
 this.currentPageNumber,this.maxNumberOfPages);if(this.currentPageNumber>-1&&this.maxNumberOfPages>-1){var $currentPageContent=this.callMethod("getCurrentPageContent",this.currentPageType,this.currentURL);$currentPageContent.addClass("AntiPagination_page").addClass("AntiPagination_currentPage").addClass("AntiPagination_p"+this.currentPageNumber).attr("data-antipagination-page",this.currentPageNumber);var currentPageContentTag=$currentPageContent.prop("tagName");var changeEvent=function(event){$(this).unbind(event);

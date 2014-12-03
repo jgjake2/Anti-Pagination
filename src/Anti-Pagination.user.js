@@ -10,7 +10,7 @@
 {{{EXCLUDES}}}
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js
-// @require          http://test2.myuserjs.org/API/0.0.5/MUJS.js
+// @require          http://myuserjs.org/API/0.0.5/MUJS.js
 {{{REQUIRES}}}
 // @version          0.0.9
 // @history          (0.0.9) Started outlining settings
@@ -98,7 +98,7 @@ var bs = document.createElement('link');
 bs.type = 'text/css';
 bs.rel = 'stylesheet';
 //bs.href = 'http://test2.myuserjs.org/css/tw-bs.3.1.1.css';
-bs.href = 'https://raw.githubusercontent.com/jgjake2/Anti-Pagination/master/tw-bs.3.1.1.css';
+bs.href = 'http://myuserjs.org/resource/jgjake2/Anti-Pagination/tw-bs.3.1.1.css';
 head.appendChild(bs);
 
 $(document).ready(function() {

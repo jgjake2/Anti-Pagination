@@ -14,11 +14,11 @@
 // @require          http://myuserjs.org/API/0.0.5/MUJS.js
 // @version          0.0.9
 // @history          (0.0.9)(cracked_com_article)   Removed bottom banner on pages
+// @history          (0.0.9)(cracked_com_blog)      Removed bottom banner on pages
 // @history          (0.0.9)(main)                  Started outlining settings
 // @history          (0.0.9)(main)                  API Update
 // @history          (0.0.9)(main)                  Major code improvements
 // @history          (0.0.9)(main)                  Updated Comments
-// @history          (0.0.9)(cracked_com_blog)      Removed bottom banner on pages
 // @history          (0.0.8)(main)                  Added Homepage and ReadMe updates
 // @history          (0.0.7)(main)                  Added script_info options to MUJS updates
 // @history          (0.0.6)(main)                  Added includes/excludes to build process
@@ -26,10 +26,10 @@
 // @history          (0.0.4)(main)                  Upload to GitHub
 // @history          (0.0.3)(main)                  Clean Up code
 // @history          (0.0.2)(main)                  MUJS API Fixes
-// @history          (0.0.1)(collegehumor_com_post) Initial Release
 // @history          (0.0.1)(cracked_com_article)   Initial Release
-// @history          (0.0.1)(main)                  Initial Release
 // @history          (0.0.1)(cracked_com_blog)      Initial Release
+// @history          (0.0.1)(collegehumor_com_post) Initial Release
+// @history          (0.0.1)(main)                  Initial Release
 // @grant            unsafeWindow
 // @grant            GM_info
 // @grant            GM_log
@@ -102,7 +102,7 @@ var bs = document.createElement('link');
 bs.type = 'text/css';
 bs.rel = 'stylesheet';
 //bs.href = 'http://test2.myuserjs.org/css/tw-bs.3.1.1.css';
-bs.href = 'https://raw.githubusercontent.com/jgjake2/Anti-Pagination/master/tw-bs.3.1.1.css';
+bs.href = 'http://myuserjs.org/resource/jgjake2/Anti-Pagination/tw-bs.3.1.1.css';
 head.appendChild(bs);
 
 $(document).ready(function() {
