@@ -11,7 +11,7 @@
 // @include          http://www.cracked.com/blog/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js
-// @require          http://test2.myuserjs.org/API/0.0.5/MUJS.js
+// @require          http://myuserjs.org/API/0.0.5/MUJS.js
 // @version          0.0.9
 // @history          (0.0.9)(cracked_com_article)   Removed bottom banner on pages
 // @history          (0.0.9)(main)                  Started outlining settings
