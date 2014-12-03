@@ -2,7 +2,8 @@
 // +@include          http://www.collegehumor.com/post/*
 // +@history          (0.0.1) Initial Release
 
-pageTypes.add('collegehumor_com_post', {
+AntiPagination.add({
+	name: 'collegehumor_com_post',
 	test: function(currentURL){
 		// Test URL
 		var isCollegeHumorPostPatt = /https?\:\/\/(?:www\.)?collegehumor\.com\/post\//i;
@@ -11,7 +12,7 @@ pageTypes.add('collegehumor_com_post', {
 		if(isCollegeHumorPost) isCollegeHumorPost = ($('.pagination').length > 0);
 		return isCollegeHumorPost;
 	},
-	init: function(currentURL){
+	init: function(currentURL, currentPageNumber, maxNumberOfPages){
 		
 	},
 	getCurrentPageNumber: function(currentURL){
@@ -28,7 +29,7 @@ pageTypes.add('collegehumor_com_post', {
 		if(typeof currentNum !== "undefined" && currentNum != '') return parseInt(currentNum);
 		return -1;
 	},
-	getgetMaxNumberOfPages: function(currentURL){
+	getMaxNumberOfPages: function(currentURL){
 		var pagePatt = /page\s+(\d+)\s+of\s+(\d+)/i;
 		
 		var $Pagination = $('.pagination');
@@ -42,27 +43,24 @@ pageTypes.add('collegehumor_com_post', {
 		if(typeof currentNum !== "undefined" && currentNum != '') return parseInt(currentNum);
 		return -1;
 	},
-	getCurrentPageContent: function(currentPageNumber, currentURL){
+	getCurrentPageContent: function(currentURL){
 		if($('.AntiPagination_currentPage').length > 0)
 			return $('.AntiPagination_currentPage');
 		$('.post-content').addClass('AntiPagination_currentPage');
 		return $('.post-content');
 	},
 	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
-		//console.log('getPageContent', currentPageNumber, contentPageNumber);
+		console.log('addPageContent', contentPageNumber);
 		var urlHTMLPatt = /(?:\/page\:\d+|\/){1}?$/gi;
-		
 		if(!urlHTMLPatt.test(currentURL))
 			currentURL = currentURL + '/';
-		
 		var newURL = currentURL.replace(urlHTMLPatt, "/page:" + contentPageNumber);
-		
 		newURL += ' .post-content > *';
-		
 		$(".AntiPagination_p" + contentPageNumber).load(newURL, function(){});
-		
 	},
-	
+	onAllPagesAdded: function(){
+		console.log('onAllPagesAdded!');
+	},
 	onContentAdded: function(contentPageNumber, $content){
 		$(".AntiPagination_p" + contentPageNumber + ' .pagination').remove();
 	}
