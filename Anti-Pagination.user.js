@@ -6,78 +6,73 @@
 // @downloadURL      http://myuserjs.org/script/jgjake2/Anti-Pagination.user.js
 // @updateURL        http://myuserjs.org/script/jgjake2/Anti-Pagination.meta.js
 // @homepage         http://myuserjs.org/script/jgjake2/Anti-Pagination
+// @include          http://test2.myuserjs.org/API/MUJS.TEST2.html
 // @include          http://www.collegehumor.com/post/*
 // @include          http://www.cracked.com/article_*
 // @include          http://www.cracked.com/blog/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-// @require          https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js
-// @require          http://myuserjs.org/API/0.0.5/MUJS.js
-// @version          0.0.9
-// @history          (0.0.9)(cracked_com_article)   Removed bottom banner on pages
-// @history          (0.0.9)(cracked_com_blog)      Removed bottom banner on pages
-// @history          (0.0.9)(main)                  Started outlining settings
-// @history          (0.0.9)(main)                  API Update
-// @history          (0.0.9)(main)                  Major code improvements
-// @history          (0.0.9)(main)                  Updated Comments
-// @history          (0.0.8)(main)                  Added Homepage and ReadMe updates
-// @history          (0.0.7)(main)                  Added script_info options to MUJS updates
-// @history          (0.0.6)(main)                  Added includes/excludes to build process
-// @history          (0.0.5)(main)                  Update API Version
-// @history          (0.0.4)(main)                  Upload to GitHub
-// @history          (0.0.3)(main)                  Clean Up code
-// @history          (0.0.2)(main)                  MUJS API Fixes
-// @history          (0.0.1)(cracked_com_article)   Initial Release
-// @history          (0.0.1)(cracked_com_blog)      Initial Release
-// @history          (0.0.1)(collegehumor_com_post) Initial Release
-// @history          (0.0.1)(main)                  Initial Release
+// @require          http://myuserjs.org/API/0.0.6/MUJS.js
+// @version          0.0.10
+// @history          (0.0.10)(main)                  Removed settings for now
+// @history          (0.0.10)(main)                  Updated API to gather script information and better error reporting
+// @history          (0.0.9) (main)                  Started outlining settings
+// @history          (0.0.9) (main)                  API Update
+// @history          (0.0.9) (main)                  Major code improvements
+// @history          (0.0.9) (main)                  Updated Comments
+// @history          (0.0.9) (cracked_com_blog)      Removed bottom banner on pages
+// @history          (0.0.9) (cracked_com_article)   Removed bottom banner on pages
+// @history          (0.0.8) (main)                  Added Homepage and ReadMe updates
+// @history          (0.0.7) (main)                  Added script_info options to MUJS updates
+// @history          (0.0.6) (main)                  Added includes/excludes to build process
+// @history          (0.0.5) (main)                  Update API Version
+// @history          (0.0.4) (main)                  Upload to GitHub
+// @history          (0.0.3) (main)                  Clean Up code
+// @history          (0.0.2) (main)                  MUJS API Fixes
+// @history          (0.0.1) (main)                  Initial Release
+// @history          (0.0.1) (collegehumor_com_post) Initial Release
+// @history          (0.0.1) (cracked_com_blog)      Initial Release
+// @history          (0.0.1) (cracked_com_article)   Initial Release
 // @grant            unsafeWindow
 // @grant            GM_info
 // @grant            GM_log
 // @grant            GM_getMetadata
 // @grant            GM_xmlhttpRequest
 // @grant            GM_registerMenuCommand
+// @unwrap
 // @noframes
 // ==/UserScript==
 
-MUJS.config('script.username', 'jgjake2'); // Set Script Owner's Name
-MUJS.config('script.script_name', 'Anti-Pagination'); // Set Script Name
-MUJS.config('Update.getType', 'data'); // Set the update data return type
-MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
+// @run-at document-start
+// @require          https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js
 
 var scriptLoadTime = -1;
+try{
+console.log('GM_info', GM_info);
 
-var script_info = {}; // Object containing information about the current script
+// Object containing information about the current script
+var script_info = MUJS.getScriptInfo({
+	'ginfo': GM_info,
+	'has_GM_info': (typeof GM_info !== "undefined" ? true : false),
+	'has_GM_getMetadata': (typeof GM_getMetadata !== "undefined" ? true : false)
+});
 
+console.log('newScriptInfo', script_info);
 
-
-if(typeof GM_info !== "undefined" && typeof GM_info.scriptHandler !== "undefined" && GM_info.scriptHandler == 'Tampermonkey'){
-	// Is Tampermonkey
-	script_info = GM_info.script;
-	script_info.script_handler = 'Tampermonkey';
-	script_info.script_handler_version = GM_info.version;
-	
-	
-} else if(typeof GM_info !== "undefined"){
-	// Is Greasemonkey
-	script_info = GM_info.script;
-	script_info.script_handler = 'Greasemonkey';
-	script_info.script_handler_version = GM_info.version;
-} else if(typeof GM_getMetadata !== "undefined"){
-	// Is Scriptish
-	script_info.script_handler = 'Scriptish';
-}
-
-MUJS.config('Update.script_info', script_info);
-console.log('script_info', script_info);
+MUJS.config('script.username', 'jgjake2'); // Set Script Owner's Name
+MUJS.config('script.script_name', 'Anti-Pagination'); // Set Script Name
+MUJS.config('Update.script_info', script_info); // Set script info data
+MUJS.config('Update.getType', 'data'); // Set the update data return type
+MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
+//MUJS.config('Error.autoReportErrors', true); // Enable reporting of timing information
+MUJS.config('debug', true);
 
 // Callback function for update check
 var updateCallback = function(result){
 	console.log('updateCallback ', result);
 }
 
-
-
 function getMUJSUpdate(){
+	//console.log('getMUJSUpdate');
 	var opts = {
 		callback: updateCallback,
 		getType: 'data',
@@ -87,12 +82,15 @@ function getMUJSUpdate(){
 	// Only add "scriptLoadTime" if it is valid
 	if(scriptLoadTime > -1)
 		opts.args.scriptLoadTime = scriptLoadTime;
-	
+		
+		
 	// Initiate update check and send args to the collection engine
 	MUJS.UPDATE.getUpdateData(opts);
 }
 
-try{
+// ToDo:
+//     Script settings
+/*try{
 function openSettings(){unsafeWindow.AntiPagination.settings.show();}
 GM_registerMenuCommand("Anti-Pagination Settings", openSettings, 'a');
 }catch(e){}
@@ -101,13 +99,9 @@ var head = document.head;
 var bs = document.createElement('link');
 bs.type = 'text/css';
 bs.rel = 'stylesheet';
-//bs.href = 'http://test2.myuserjs.org/css/tw-bs.3.1.1.css';
 bs.href = 'http://myuserjs.org/resource/jgjake2/Anti-Pagination/tw-bs.3.1.1.css';
-head.appendChild(bs);
-
+head.appendChild(bs);*/
 $(document).ready(function() {
-
-
 
 	function PageTypeClass(data){
 		return $.extend({
@@ -175,13 +169,13 @@ $(document).ready(function() {
 					};
 					
 					for(var i = 1; i < this.currentPageNumber; i++){
-						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
+						var $newDiv = $("<" + currentPageContentTag + ">", {'class': "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.before($newDiv);
 						$newDiv.bind("DOMSubtreeModified", changeEvent);
 					}
 					
 					for(var i = this.maxNumberOfPages; i > this.currentPageNumber; i--){
-						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
+						var $newDiv = $("<" + currentPageContentTag + ">", {'class': "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.after($newDiv);
 						$newDiv.bind("DOMSubtreeModified", changeEvent);
 					}
@@ -293,7 +287,7 @@ $(document).ready(function() {
 						</div><!-- /.modal -->\
 					</div>';
 
-				$('body').append(modal);
+				//$('body').append(modal);
 			}
 		
 		}
@@ -494,12 +488,26 @@ AntiPagination.add({
 	unsafeWindow.AntiPagination = AntiPagination;
 	
 	// Start the script
-	AntiPagination.init();
-	
-	// Get the page load time
-	scriptLoadTime = performance.now();
-	
-	// Wait to report data (required if you want "pageLoadTime" to be accurate)
-	setTimeout(getMUJSUpdate, 2500);
+	//setTimeout(function(){
+	function onReadyCB(){
+		//console.log('onReadyCB');
+		AntiPagination.init();
+		
+		// Get the page load time
+		scriptLoadTime = performance.now();
+		
+		// Wait to report data (required if you want "pageLoadTime" to be accurate)
+		MUJS.onPageReady = getMUJSUpdate;
+	}
+	MUJS.onReady = onReadyCB;
 	
 });
+
+} catch(e) {
+	//console.log('caught error', e);
+	console.log('caught error eObj', e.stack);
+	//continue;
+	MUJS.ERROR.processError(e);
+	//return true;
+}
+//}

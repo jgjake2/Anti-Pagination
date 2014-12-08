@@ -6,13 +6,15 @@
 // @downloadURL      http://myuserjs.org/script/jgjake2/Anti-Pagination.user.js
 // @updateURL        http://myuserjs.org/script/jgjake2/Anti-Pagination.meta.js
 // @homepage         http://myuserjs.org/script/jgjake2/Anti-Pagination
+// @include          http://test2.myuserjs.org/API/MUJS.TEST2.html
 {{{INCLUDES}}}
 {{{EXCLUDES}}}
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-// @require          https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js
-// @require          http://myuserjs.org/API/0.0.5/MUJS.js
+// @require          http://myuserjs.org/API/0.0.6/MUJS.js
 {{{REQUIRES}}}
-// @version          0.0.9
+// @version          0.0.10
+// @history          (0.0.10) Removed settings for now
+// @history          (0.0.10) Updated API to gather script information and better error reporting
 // @history          (0.0.9) Started outlining settings
 // @history          (0.0.9) API Update
 // @history          (0.0.9) Major code improvements
@@ -32,48 +34,47 @@
 // @grant            GM_getMetadata
 // @grant            GM_xmlhttpRequest
 // @grant            GM_registerMenuCommand
+// @unwrap
 // @noframes
 // ==/UserScript==
 
-MUJS.config('script.username', 'jgjake2'); // Set Script Owner's Name
-MUJS.config('script.script_name', 'Anti-Pagination'); // Set Script Name
-MUJS.config('Update.getType', 'data'); // Set the update data return type
-MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
+// @run-at document-start
+// @require          https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js
 
 var scriptLoadTime = -1;
+try{
+console.log('GM_info', GM_info);
 
-var script_info = {}; // Object containing information about the current script
+// Object containing information about the current script
+var script_info = MUJS.getScriptInfo({
+	'ginfo': GM_info,
+	'has_GM_info': (typeof GM_info !== "undefined" ? true : false),
+	'has_GM_getMetadata': (typeof GM_getMetadata !== "undefined" ? true : false)
+});
 
+console.log('newScriptInfo', script_info);
 
-
-if(typeof GM_info !== "undefined" && typeof GM_info.scriptHandler !== "undefined" && GM_info.scriptHandler == 'Tampermonkey'){
-	// Is Tampermonkey
-	script_info = GM_info.script;
-	script_info.script_handler = 'Tampermonkey';
-	script_info.script_handler_version = GM_info.version;
-	
-	
-} else if(typeof GM_info !== "undefined"){
-	// Is Greasemonkey
-	script_info = GM_info.script;
-	script_info.script_handler = 'Greasemonkey';
-	script_info.script_handler_version = GM_info.version;
-} else if(typeof GM_getMetadata !== "undefined"){
-	// Is Scriptish
-	script_info.script_handler = 'Scriptish';
-}
-
-MUJS.config('Update.script_info', script_info);
-console.log('script_info', script_info);
+MUJS.config('script.username', 'jgjake2'); // Set Script Owner's Name
+MUJS.config('script.script_name', 'Anti-Pagination'); // Set Script Name
+MUJS.config('Update.script_info', script_info); // Set script info data
+MUJS.config('Update.getType', 'data'); // Set the update data return type
+MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
+//MUJS.config('Error.autoReportErrors', true); // Enable reporting of timing information
+MUJS.config('debug', true);
 
 // Callback function for update check
 var updateCallback = function(result){
 	console.log('updateCallback ', result);
 }
 
-
-
 function getMUJSUpdate(){
+	//console.log('getMUJSUpdate');
+{{{DEBUG_ONLY}}}
+	// Create error test
+	//var bar = undefined;
+	//var foo = bar(taco, bell);
+{{{\DEBUG_ONLY}}}
+
 	var opts = {
 		callback: updateCallback,
 		getType: 'data',
@@ -83,12 +84,17 @@ function getMUJSUpdate(){
 	// Only add "scriptLoadTime" if it is valid
 	if(scriptLoadTime > -1)
 		opts.args.scriptLoadTime = scriptLoadTime;
-	
+		
+		
+{{{RELEASE_ONLY}}}
 	// Initiate update check and send args to the collection engine
 	MUJS.UPDATE.getUpdateData(opts);
+{{{\RELEASE_ONLY}}}
 }
 
-try{
+// ToDo:
+//     Script settings
+/*try{
 function openSettings(){unsafeWindow.AntiPagination.settings.show();}
 GM_registerMenuCommand("Anti-Pagination Settings", openSettings, 'a');
 }catch(e){}
@@ -97,13 +103,9 @@ var head = document.head;
 var bs = document.createElement('link');
 bs.type = 'text/css';
 bs.rel = 'stylesheet';
-//bs.href = 'http://test2.myuserjs.org/css/tw-bs.3.1.1.css';
 bs.href = 'http://myuserjs.org/resource/jgjake2/Anti-Pagination/tw-bs.3.1.1.css';
-head.appendChild(bs);
-
+head.appendChild(bs);*/
 $(document).ready(function() {
-
-
 
 	function PageTypeClass(data){
 		return $.extend({
@@ -289,7 +291,7 @@ $(document).ready(function() {
 						</div><!-- /.modal -->\
 					</div>';
 
-				$('body').append(modal);
+				//$('body').append(modal);
 			}
 		
 		}
@@ -304,12 +306,26 @@ $(document).ready(function() {
 	unsafeWindow.AntiPagination = AntiPagination;
 	
 	// Start the script
-	AntiPagination.init();
-	
-	// Get the page load time
-	scriptLoadTime = performance.now();
-	
-	// Wait to report data (required if you want "pageLoadTime" to be accurate)
-	setTimeout(getMUJSUpdate, 2500);
+	//setTimeout(function(){
+	function onReadyCB(){
+		//console.log('onReadyCB');
+		AntiPagination.init();
+		
+		// Get the page load time
+		scriptLoadTime = performance.now();
+		
+		// Wait to report data (required if you want "pageLoadTime" to be accurate)
+		MUJS.onPageReady = getMUJSUpdate;
+	}
+	MUJS.onReady = onReadyCB;
 	
 });
+
+} catch(e) {
+	//console.log('caught error', e);
+	console.log('caught error eObj', e.stack);
+	//continue;
+	MUJS.ERROR.processError(e);
+	//return true;
+}
+//}

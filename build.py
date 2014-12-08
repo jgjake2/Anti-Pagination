@@ -2,7 +2,7 @@ import json
 import sys
 import shutil
 from collections import OrderedDict
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 
 try: # Py3
   from urllib.parse import urlencode
@@ -73,6 +73,17 @@ def compareVersionStrings(str1, str2):
         return -1
     return 0
 
+    
+def removeConditionalBlocks(blockName, subject, removeBlock):
+    matches = list(re.finditer(r"((?:\r?\n[ ]*)?(?:\/\/\s*)?\{\{\{"+blockName+"\}\}\})((?:.*?[\r\n]*)+)((?:\/\/\s*)?\{\{\{(?:\/|\\\\)"+blockName+"\}\}\}(?:[ ]*\r?\n)?)", subject, re.MULTILINE + re.IGNORECASE))
+    matches.reverse()
+    for m in matches:
+        if(removeBlock == False):
+            return subject[0:m.span()[0]] + m.group(2) + subject[m.span()[1]:]
+        else:
+            return subject[0:m.span()[0]] + subject[m.span()[1]:]
+    return subject
+    
 print("Start")
 
 #print('compare', compareVersionStrings('0.0.1', '0.0.2'))
@@ -82,6 +93,10 @@ print("Start")
 parser = argparse.ArgumentParser(description='Build Anti-Pagination.')
 parser.add_argument('-v', '-version', default='-1', nargs='?', help='version number')
 parser.add_argument('-api', '-apiversion', default='-1', nargs='?', help='api version number')
+#parser.add_argument('-d', '-debug', default='-1', nargs='?', help='enable debug mode')
+parser.add_argument('-d', '-debug', default=False, action='store_true', help='enable debug mode')
+parser.add_argument('-r', '-release', default=False, action='store_true', help='build release')
+parser.add_argument('-m', '-min', default=False, action='store_true', help='minify the file')
 parser.add_argument('-cp', '-copyfile', default='', nargs='?', help='copy the output to a location')
 parser.add_argument('-cp2', '-copyfile2', default='', nargs='?', help='copy the output to a second location')
 args = parser.parse_args()
@@ -89,7 +104,7 @@ args = parser.parse_args()
 print('cp', args.cp)
 print('cp2', args.cp2)
 #build.py -v 0.0.6 -api 0.0.4 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js" -cp2 "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\p9kb0d2b.default\scriptish_scripts\anti-pagination@httpmyuserjsorguserjgjake2\anti-pagination@httpmyuserjsorguserjgjake2.user.js"
-
+#build.py -v 0.0.9 -api 0.0.5 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js"
 onlyfiles = [ f for f in listdir('./src/pageTypes') if isfile(join('./src/pageTypes',f)) ]
 
 print("Page Types: ", onlyfiles)
@@ -103,6 +118,7 @@ excludeList = []
 requireList = []
 historyList = {}
 maxNameLen = -1
+maxVersionLen = -1
 
 tFile = ''
 with open ('./src/Anti-Pagination.user.js', "r") as myfile:
@@ -110,6 +126,8 @@ with open ('./src/Anti-Pagination.user.js', "r") as myfile:
 
 for m in re.finditer(r"^\/\/\s+\@history\s+\((.*?)\)\s*(.*?)\s*$", tFile, re.MULTILINE + re.IGNORECASE):
     #print('main match', m.group(0))
+    if(len(m.group(1)) > maxVersionLen):
+        maxVersionLen = len(m.group(1))
     if(m.group(1) not in historyList):
         historyList[m.group(1)] = {}
     if('main' not in historyList[m.group(1)]):
@@ -143,6 +161,8 @@ for fileName in onlyfiles:
       for m in re.finditer(r"^\/\/\s+\+\@history\s+\((.*?)\)\s*(.*?)\s*$", currentFileContent, re.MULTILINE + re.IGNORECASE):
         #print('history match', m)
         #print('history match -- version: ', m.group(1), ' -- value: ', m.group(2))
+        if(len(m.group(1)) > maxVersionLen):
+            maxVersionLen = len(m.group(1))
         if(m.group(1) not in historyList):
             historyList[m.group(1)] = {}
         if(thisName not in historyList[m.group(1)]):
@@ -174,6 +194,7 @@ for vers,versVal in historyList.items():
     for name,nameVal in versVal.items():
         for item in nameVal:
             tNameStr = ('(' + name + ')').ljust(maxNameLen + 3, " ")
+            #tNameStr = ('(' + name + ')').rjust(maxVersionLen - len(name), " ").ljust(maxNameLen + 3, " ")
             historyList2[vers].append(tNameStr + item)
 
 
@@ -203,14 +224,14 @@ histKeys.reverse()
 
 for vNum in histKeys:
 
-    tVersionStr = ("("+vNum+")").ljust(7, " ")
+    tVersionStr = ("("+vNum+")").ljust(7 + (maxVersionLen - len(vNum)), " ")
     for tVal in historyList2[vNum]:
         historyStr+="// @history          "+tVersionStr+tVal+"\n"
 #print('historyStr\n', historyStr)
 #with open ('./src/Anti-Pagination.user.js', "r") as myfile:
     #output=myfile.read().replace('{{{ADD_PAGE_TYPES}}}', fileTypes).replace('{{{INCLUDES}}}\n', includeStr).replace('{{{EXCLUDES}}}\n', excludeStr).replace('{{{REQUIRES}}}\n', requireStr)
 pageTypesStr = '\n'.join([str(x) for x in pageTypes])
-output=tFile.replace('{{{ADD_PAGE_TYPES}}}', pageTypesStr).replace('{{{INCLUDES}}}\n', includeStr).replace('{{{EXCLUDES}}}\n', excludeStr).replace('{{{REQUIRES}}}\n', requireStr).replace('{{{HISTORY}}}\n', historyStr)
+output=(tFile.replace('{{{ADD_PAGE_TYPES}}}', pageTypesStr).replace('{{{INCLUDES}}}\n', includeStr).replace('{{{EXCLUDES}}}\n', excludeStr).replace('{{{REQUIRES}}}\n', requireStr).replace('{{{HISTORY}}}\n', historyStr))
 
 if(args.v != '-1'):
     output = re.sub(r'^(\/\/\s+\@version\s+).*?\s*$', r'\g<1>' + args.v, output, 0, re.MULTILINE + re.IGNORECASE)
@@ -218,26 +239,35 @@ if(args.v != '-1'):
 if(args.api != '-1'):
   output = re.sub(r'^(\/\/\s+\@require\s+https?:\/\/myuserjs.org\/API/MUJS(?:\.min)?\.js\/).*?\/?\s*$', r'\g<1>' + args.api, output, 0, re.MULTILINE + re.IGNORECASE)
 
+
+
+  
+#Remove Debug tags
+output = removeConditionalBlocks("DEBUG_ONLY", output, not args.d)
+output = removeConditionalBlocks("RELEASE_ONLY", output, not args.r)
+
 metaBlock = getMetaBlock(output)
 
 #print('metaBlock: ', metaBlock)
 
-minStr = compressString(output, 'WHITESPACE_ONLY', 'ECMASCRIPT5')
-    
-#minStr = metaBlock + 'if(window.top!=window.self)return;' + minStr
-minStr = metaBlock + minStr
+if(args.m == True):
+    minStr = compressString(output, 'WHITESPACE_ONLY', 'ECMASCRIPT5')
+    minStr = metaBlock + minStr
 
 
 with open ('./Anti-Pagination.user.js', "w") as myfile:
     myfile.write(output)
 
-with open ('./Anti-Pagination.min.user.js', "w") as myfile:
-    myfile.write(minStr)
+if(args.m == True):
+    with open ('./Anti-Pagination.min.user.js', "w") as myfile:
+        myfile.write(minStr)
 
 if(args.cp != ''):
+    print('Copying ./Anti-Pagination.user.js to ' + args.cp)
     shutil.copyfile('./Anti-Pagination.user.js', args.cp)
     
 if(args.cp2 != ''):
+    print('Copying ./Anti-Pagination.user.js to ' + args.cp2)
     shutil.copyfile('./Anti-Pagination.user.js', args.cp2)
     
 print("Done")
