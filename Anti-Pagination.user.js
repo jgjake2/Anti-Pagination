@@ -12,7 +12,9 @@
 // @include          http://www.cracked.com/blog/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          http://myuserjs.org/API/0.0.6/MUJS.js
-// @version          0.0.10
+// @version          0.0.11
+// @history          (0.0.11)(main)                  Updated API version
+// @history          (0.0.11)(main)                  Minor script improvements
 // @history          (0.0.10)(main)                  Removed settings for now
 // @history          (0.0.10)(main)                  Updated API to gather script information and better error reporting
 // @history          (0.0.9) (main)                  Started outlining settings
@@ -29,9 +31,9 @@
 // @history          (0.0.3) (main)                  Clean Up code
 // @history          (0.0.2) (main)                  MUJS API Fixes
 // @history          (0.0.1) (main)                  Initial Release
-// @history          (0.0.1) (collegehumor_com_post) Initial Release
 // @history          (0.0.1) (cracked_com_blog)      Initial Release
 // @history          (0.0.1) (cracked_com_article)   Initial Release
+// @history          (0.0.1) (collegehumor_com_post) Initial Release
 // @grant            unsafeWindow
 // @grant            GM_info
 // @grant            GM_log
@@ -47,7 +49,7 @@
 
 var scriptLoadTime = -1;
 try{
-console.log('GM_info', GM_info);
+//console.log('GM_info', GM_info);
 
 // Object containing information about the current script
 var script_info = MUJS.getScriptInfo({
@@ -64,7 +66,7 @@ MUJS.config('Update.script_info', script_info); // Set script info data
 MUJS.config('Update.getType', 'data'); // Set the update data return type
 MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
 //MUJS.config('Error.autoReportErrors', true); // Enable reporting of timing information
-MUJS.config('debug', true);
+//MUJS.config('debug', true);
 
 // Callback function for update check
 var updateCallback = function(result){
@@ -73,6 +75,8 @@ var updateCallback = function(result){
 
 function getMUJSUpdate(){
 	//console.log('getMUJSUpdate');
+
+
 	var opts = {
 		callback: updateCallback,
 		getType: 'data',
@@ -169,13 +173,13 @@ $(document).ready(function() {
 					};
 					
 					for(var i = 1; i < this.currentPageNumber; i++){
-						var $newDiv = $("<" + currentPageContentTag + ">", {'class': "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
+						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.before($newDiv);
 						$newDiv.bind("DOMSubtreeModified", changeEvent);
 					}
 					
 					for(var i = this.maxNumberOfPages; i > this.currentPageNumber; i--){
-						var $newDiv = $("<" + currentPageContentTag + ">", {'class': "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
+						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.after($newDiv);
 						$newDiv.bind("DOMSubtreeModified", changeEvent);
 					}
@@ -505,9 +509,7 @@ AntiPagination.add({
 
 } catch(e) {
 	//console.log('caught error', e);
-	console.log('caught error eObj', e.stack);
-	//continue;
+	console.log('caught error', e.stack);
 	MUJS.ERROR.processError(e);
-	//return true;
 }
 //}

@@ -12,7 +12,9 @@
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          http://myuserjs.org/API/0.0.6/MUJS.js
 {{{REQUIRES}}}
-// @version          0.0.10
+// @version          0.0.11
+// @history          (0.0.11) Updated API version
+// @history          (0.0.11) Minor script improvements
 // @history          (0.0.10) Removed settings for now
 // @history          (0.0.10) Updated API to gather script information and better error reporting
 // @history          (0.0.9) Started outlining settings
@@ -43,7 +45,7 @@
 
 var scriptLoadTime = -1;
 try{
-console.log('GM_info', GM_info);
+//console.log('GM_info', GM_info);
 
 // Object containing information about the current script
 var script_info = MUJS.getScriptInfo({
@@ -60,20 +62,22 @@ MUJS.config('Update.script_info', script_info); // Set script info data
 MUJS.config('Update.getType', 'data'); // Set the update data return type
 MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
 //MUJS.config('Error.autoReportErrors', true); // Enable reporting of timing information
-MUJS.config('debug', true);
+//MUJS.config('debug', true);
 
 // Callback function for update check
 var updateCallback = function(result){
 	console.log('updateCallback ', result);
 }
 
-function getMUJSUpdate(){
-	//console.log('getMUJSUpdate');
 {{{DEBUG_ONLY}}}
 	// Create error test
-	//var bar = undefined;
-	//var foo = bar(taco, bell);
+	var bar = undefined;
+	var foo = bar(taco, bell);
 {{{\DEBUG_ONLY}}}
+
+function getMUJSUpdate(){
+	//console.log('getMUJSUpdate');
+
 
 	var opts = {
 		callback: updateCallback,
@@ -323,9 +327,7 @@ $(document).ready(function() {
 
 } catch(e) {
 	//console.log('caught error', e);
-	console.log('caught error eObj', e.stack);
-	//continue;
+	console.log('caught error', e.stack);
 	MUJS.ERROR.processError(e);
-	//return true;
 }
 //}
