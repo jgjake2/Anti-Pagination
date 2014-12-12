@@ -79,9 +79,9 @@ def removeConditionalBlocks(blockName, subject, removeBlock):
     matches.reverse()
     for m in matches:
         if(removeBlock == False):
-            return subject[0:m.span()[0]] + m.group(2) + subject[m.span()[1]:]
+            subject = subject[0:m.span()[0]] + m.group(2) + subject[m.span()[1]:]
         else:
-            return subject[0:m.span()[0]] + subject[m.span()[1]:]
+            subject = subject[0:m.span()[0]] + subject[m.span()[1]:]
     return subject
     
 print("Start")
@@ -104,7 +104,7 @@ args = parser.parse_args()
 print('cp', args.cp)
 print('cp2', args.cp2)
 #build.py -v 0.0.6 -api 0.0.4 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js" -cp2 "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\p9kb0d2b.default\scriptish_scripts\anti-pagination@httpmyuserjsorguserjgjake2\anti-pagination@httpmyuserjsorguserjgjake2.user.js"
-#build.py -v 0.0.12 -api 0.0.11 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js"
+#build.py -v 0.0.13 -api 0.0.12 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js"
 onlyfiles = [ f for f in listdir('./src/pageTypes') if isfile(join('./src/pageTypes',f)) ]
 
 print("Page Types: ", onlyfiles)

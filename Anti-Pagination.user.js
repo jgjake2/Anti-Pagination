@@ -11,13 +11,14 @@
 // @include          http://www.cracked.com/article_*
 // @include          http://www.cracked.com/blog/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-// @require          http://myuserjs.org/API/0.0.11/MUJS.js
-// @version          0.0.12
+// @require          http://myuserjs.org/API/0.0.13/MUJS.js
+// @version          0.0.13
+// @history          (0.0.13)(main)                  Moved script_info init inside MUJS API
 // @history          (0.0.12)(main)                  Added $target to addPageContent parameters
 // @history          (0.0.12)(main)                  Changed mutation events to page observers
 // @history          (0.0.12)(collegehumor_com_post) Updated addPageContent to use $target
-// @history          (0.0.12)(cracked_com_article)   Updated addPageContent to use $target
 // @history          (0.0.12)(cracked_com_blog)      Updated addPageContent to use $target
+// @history          (0.0.12)(cracked_com_article)   Updated addPageContent to use $target
 // @history          (0.0.11)(main)                  Updated API version
 // @history          (0.0.11)(main)                  Minor script improvements
 // @history          (0.0.10)(main)                  Removed settings for now
@@ -26,8 +27,8 @@
 // @history          (0.0.9) (main)                  API Update
 // @history          (0.0.9) (main)                  Major code improvements
 // @history          (0.0.9) (main)                  Updated Comments
-// @history          (0.0.9) (cracked_com_article)   Removed bottom banner on pages
 // @history          (0.0.9) (cracked_com_blog)      Removed bottom banner on pages
+// @history          (0.0.9) (cracked_com_article)   Removed bottom banner on pages
 // @history          (0.0.8) (main)                  Added Homepage and ReadMe updates
 // @history          (0.0.7) (main)                  Added script_info options to MUJS updates
 // @history          (0.0.6) (main)                  Added includes/excludes to build process
@@ -37,8 +38,8 @@
 // @history          (0.0.2) (main)                  MUJS API Fixes
 // @history          (0.0.1) (main)                  Initial Release
 // @history          (0.0.1) (collegehumor_com_post) Initial Release
-// @history          (0.0.1) (cracked_com_article)   Initial Release
 // @history          (0.0.1) (cracked_com_blog)      Initial Release
+// @history          (0.0.1) (cracked_com_article)   Initial Release
 // @grant            unsafeWindow
 // @grant            GM_info
 // @grant            GM_log
@@ -57,23 +58,19 @@ try{
 //console.log('GM_info', GM_info);
 
 // Object containing information about the current script
-MUJS({
-	'ginfo': GM_info,
-	'has_GM_info': (typeof GM_info !== "undefined" ? true : false),
-	'has_GM_getMetadata': (typeof GM_getMetadata !== "undefined" ? true : false)
-});
+// Only necessary if MUJS is loaded outside of greasemonkey/tampermonkey
 
-//console.log('newScriptInfo', script_info);
+//MUJS.API('log', 'log test 1');
+//MUJS.API('info', 'log test 2');
 
-MUJS('set', 'script.username', 'jgjake2'); // Set Script Owner's Name
-MUJS('set', 'script.script_name', 'Anti-Pagination'); // Set Script Name
+//MUJS('set', 'script.username', 'jgjake2'); // Set Script Owner's Name
+//MUJS('set', 'script.script_name', 'Anti-Pagination'); // Set Script Name
 MUJS('set', 'Update.getType', 'data'); // Set the update data return type
 MUJS('set', 'Update.DOMTiming', true); // Enable reporting of timing information
 MUJS('set', 'Error.autoReportErrors', true); // Enable reporting of timing information
 //MUJS.config('Update.getStats', true);
 MUJS('set', 'Update.XMLHttpRequest', true);
 //MUJS.config('debug', true);
-//console.log('get username', MUJS('get', 'script.username'));
 
 // Callback function for update check
 var updateCallback = function(result){
@@ -533,7 +530,7 @@ AntiPagination.add({
 });
 
 } catch(e) {
-	//console.log('caught error', e);
+	console.log('caught error', e);
 	console.log('caught error', e.stack);
 	MUJS.ERROR.processError(e);
 }

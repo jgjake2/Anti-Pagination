@@ -12,7 +12,8 @@
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          http://myuserjs.org/API/0.0.6/MUJS.js
 {{{REQUIRES}}}
-// @version          0.0.12
+// @version          0.0.13
+// @history          (0.0.13) Moved script_info init inside MUJS API
 // @history          (0.0.12) Added $target to addPageContent parameters
 // @history          (0.0.12) Changed mutation events to page observers
 // @history          (0.0.11) Updated API version
@@ -50,16 +51,13 @@ try{
 //console.log('GM_info', GM_info);
 
 // Object containing information about the current script
-MUJS({
-	'ginfo': GM_info,
-	'has_GM_info': (typeof GM_info !== "undefined" ? true : false),
-	'has_GM_getMetadata': (typeof GM_getMetadata !== "undefined" ? true : false)
-});
+// Only necessary if MUJS is loaded outside of greasemonkey/tampermonkey
 
-//console.log('newScriptInfo', script_info);
+//MUJS.API('log', 'log test 1');
+//MUJS.API('info', 'log test 2');
 
-MUJS('set', 'script.username', 'jgjake2'); // Set Script Owner's Name
-MUJS('set', 'script.script_name', 'Anti-Pagination'); // Set Script Name
+//MUJS('set', 'script.username', 'jgjake2'); // Set Script Owner's Name
+//MUJS('set', 'script.script_name', 'Anti-Pagination'); // Set Script Name
 MUJS('set', 'Update.getType', 'data'); // Set the update data return type
 MUJS('set', 'Update.DOMTiming', true); // Enable reporting of timing information
 MUJS('set', 'Error.autoReportErrors', true); // Enable reporting of timing information
@@ -82,7 +80,7 @@ try{
 	// Create error test
 	//var bar = undefined;
 	//var foo = bar(taco, bell);
-	var foo = eval('FAIL');
+	//var foo = eval('FAIL');
 } catch(e) {
 	//console.log('caught error - getMUJSUpdate', e.stack);
 	MUJS.ERROR.processError(e);
@@ -107,6 +105,13 @@ try{
 	MUJS.UPDATE.getUpdateData(opts);
 	
 {{{\RELEASE_ONLY}}}
+
+{{{DEBUG_ONLY}}}
+	
+	// Get Update URL
+	console.log(MUJS.UPDATE.getURL(opts));
+	
+{{{\DEBUG_ONLY}}}
 
 }
 
@@ -354,7 +359,7 @@ $(document).ready(function() {
 });
 
 } catch(e) {
-	//console.log('caught error', e);
+	console.log('caught error', e);
 	console.log('caught error', e.stack);
 	MUJS.ERROR.processError(e);
 }
