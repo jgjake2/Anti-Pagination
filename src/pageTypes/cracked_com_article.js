@@ -2,6 +2,7 @@
 // +@include          http://www.cracked.com/article_*
 // +@history          (0.0.1) Initial Release
 // +@history          (0.0.9) Removed bottom banner on pages
+// +@history          (0.0.12) Updated addPageContent to use $target
 
 AntiPagination.add({
 	name: 'cracked_com_article',
@@ -37,14 +38,14 @@ AntiPagination.add({
 		$('#safePlace .body > section:first').addClass('AntiPagination_currentPage');
 		return $('#safePlace .body > section:first');
 	},
-	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber, $target){
 		var urlHTMLPatt = /((?:_p\d+)?\.html)\s*$/gi;
 		
 		var newURL = currentURL.replace(urlHTMLPatt, "_p" + contentPageNumber + ".html");
 		
 		newURL += ' #safePlace .body > section:first > *';
 		
-		$(".AntiPagination_p" + contentPageNumber).load(newURL, function(){});
+		$target.load(newURL, function(){});
 		
 	},
 	onContentAdded: function(contentPageNumber, $content){

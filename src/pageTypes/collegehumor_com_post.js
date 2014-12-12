@@ -1,6 +1,7 @@
 // +@typename         collegehumor_com_post
 // +@include          http://www.collegehumor.com/post/*
 // +@history          (0.0.1) Initial Release
+// +@history          (0.0.12) Updated addPageContent to use $target
 
 AntiPagination.add({
 	name: 'collegehumor_com_post',
@@ -49,14 +50,14 @@ AntiPagination.add({
 		$('.post-content').addClass('AntiPagination_currentPage');
 		return $('.post-content');
 	},
-	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber, $target){
 		console.log('addPageContent', contentPageNumber);
 		var urlHTMLPatt = /(?:\/page\:\d+|\/){1}?$/gi;
 		if(!urlHTMLPatt.test(currentURL))
 			currentURL = currentURL + '/';
 		var newURL = currentURL.replace(urlHTMLPatt, "/page:" + contentPageNumber);
 		newURL += ' .post-content > *';
-		$(".AntiPagination_p" + contentPageNumber).load(newURL, function(){});
+		$target.load(newURL, function(){});
 	},
 	onAllPagesAdded: function(){
 		console.log('onAllPagesAdded!');

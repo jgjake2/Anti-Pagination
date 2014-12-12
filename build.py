@@ -104,7 +104,7 @@ args = parser.parse_args()
 print('cp', args.cp)
 print('cp2', args.cp2)
 #build.py -v 0.0.6 -api 0.0.4 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js" -cp2 "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\p9kb0d2b.default\scriptish_scripts\anti-pagination@httpmyuserjsorguserjgjake2\anti-pagination@httpmyuserjsorguserjgjake2.user.js"
-#build.py -v 0.0.9 -api 0.0.5 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js"
+#build.py -v 0.0.12 -api 0.0.11 -cp "C:\Users\Spud\AppData\Roaming\Mozilla\Firefox\Profiles\hatqckbp.Dev\gm_scripts\Anti-Pagination\Anti-Pagination.user.js"
 onlyfiles = [ f for f in listdir('./src/pageTypes') if isfile(join('./src/pageTypes',f)) ]
 
 print("Page Types: ", onlyfiles)
@@ -237,7 +237,7 @@ if(args.v != '-1'):
     output = re.sub(r'^(\/\/\s+\@version\s+).*?\s*$', r'\g<1>' + args.v, output, 0, re.MULTILINE + re.IGNORECASE)
 
 if(args.api != '-1'):
-  output = re.sub(r'^(\/\/\s+\@require\s+https?:\/\/myuserjs.org\/API/MUJS(?:\.min)?\.js\/).*?\/?\s*$', r'\g<1>' + args.api, output, 0, re.MULTILINE + re.IGNORECASE)
+    output = re.sub(r'^(\/\/\s+\@require\s+https?:\/\/myuserjs.org\/API\/)([^\/]+)(\/MUJS(?:\.min)?\.js\/?.*?\/?\s*)$', r'\g<1>' + args.api + '\g<3>', output, 0, re.MULTILINE + re.IGNORECASE)
 
 
 

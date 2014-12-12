@@ -11,8 +11,13 @@
 // @include          http://www.cracked.com/article_*
 // @include          http://www.cracked.com/blog/*
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-// @require          http://myuserjs.org/API/0.0.6/MUJS.js
-// @version          0.0.11
+// @require          http://myuserjs.org/API/0.0.11/MUJS.js
+// @version          0.0.12
+// @history          (0.0.12)(main)                  Added $target to addPageContent parameters
+// @history          (0.0.12)(main)                  Changed mutation events to page observers
+// @history          (0.0.12)(collegehumor_com_post) Updated addPageContent to use $target
+// @history          (0.0.12)(cracked_com_article)   Updated addPageContent to use $target
+// @history          (0.0.12)(cracked_com_blog)      Updated addPageContent to use $target
 // @history          (0.0.11)(main)                  Updated API version
 // @history          (0.0.11)(main)                  Minor script improvements
 // @history          (0.0.10)(main)                  Removed settings for now
@@ -21,8 +26,8 @@
 // @history          (0.0.9) (main)                  API Update
 // @history          (0.0.9) (main)                  Major code improvements
 // @history          (0.0.9) (main)                  Updated Comments
-// @history          (0.0.9) (cracked_com_blog)      Removed bottom banner on pages
 // @history          (0.0.9) (cracked_com_article)   Removed bottom banner on pages
+// @history          (0.0.9) (cracked_com_blog)      Removed bottom banner on pages
 // @history          (0.0.8) (main)                  Added Homepage and ReadMe updates
 // @history          (0.0.7) (main)                  Added script_info options to MUJS updates
 // @history          (0.0.6) (main)                  Added includes/excludes to build process
@@ -31,9 +36,9 @@
 // @history          (0.0.3) (main)                  Clean Up code
 // @history          (0.0.2) (main)                  MUJS API Fixes
 // @history          (0.0.1) (main)                  Initial Release
-// @history          (0.0.1) (cracked_com_blog)      Initial Release
-// @history          (0.0.1) (cracked_com_article)   Initial Release
 // @history          (0.0.1) (collegehumor_com_post) Initial Release
+// @history          (0.0.1) (cracked_com_article)   Initial Release
+// @history          (0.0.1) (cracked_com_blog)      Initial Release
 // @grant            unsafeWindow
 // @grant            GM_info
 // @grant            GM_log
@@ -52,31 +57,33 @@ try{
 //console.log('GM_info', GM_info);
 
 // Object containing information about the current script
-var script_info = MUJS.getScriptInfo({
+MUJS({
 	'ginfo': GM_info,
 	'has_GM_info': (typeof GM_info !== "undefined" ? true : false),
 	'has_GM_getMetadata': (typeof GM_getMetadata !== "undefined" ? true : false)
 });
 
-console.log('newScriptInfo', script_info);
+//console.log('newScriptInfo', script_info);
 
-MUJS.config('script.username', 'jgjake2'); // Set Script Owner's Name
-MUJS.config('script.script_name', 'Anti-Pagination'); // Set Script Name
-MUJS.config('Update.script_info', script_info); // Set script info data
-MUJS.config('Update.getType', 'data'); // Set the update data return type
-MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
-//MUJS.config('Error.autoReportErrors', true); // Enable reporting of timing information
+MUJS('set', 'script.username', 'jgjake2'); // Set Script Owner's Name
+MUJS('set', 'script.script_name', 'Anti-Pagination'); // Set Script Name
+MUJS('set', 'Update.getType', 'data'); // Set the update data return type
+MUJS('set', 'Update.DOMTiming', true); // Enable reporting of timing information
+MUJS('set', 'Error.autoReportErrors', true); // Enable reporting of timing information
+//MUJS.config('Update.getStats', true);
+MUJS('set', 'Update.XMLHttpRequest', true);
 //MUJS.config('debug', true);
+//console.log('get username', MUJS('get', 'script.username'));
 
 // Callback function for update check
 var updateCallback = function(result){
 	console.log('updateCallback ', result);
 }
 
+
+
 function getMUJSUpdate(){
 	//console.log('getMUJSUpdate');
-
-
 	var opts = {
 		callback: updateCallback,
 		getType: 'data',
@@ -87,9 +94,12 @@ function getMUJSUpdate(){
 	if(scriptLoadTime > -1)
 		opts.args.scriptLoadTime = scriptLoadTime;
 		
-		
+	//console.log(MUJS.UPDATE.getURL(opts));	
+	//MUJS.UPDATE.getUpdateData(opts);
 	// Initiate update check and send args to the collection engine
 	MUJS.UPDATE.getUpdateData(opts);
+	
+
 }
 
 // ToDo:
@@ -125,13 +135,13 @@ $(document).ready(function() {
 			getCurrentPageContent: function(currentURL){
 				// Get the content of the current page as a jQuery object
 			},
-			addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+			addPageContent: function(currentURL, currentPageNumber, contentPageNumber, $target){
 				// Get and return the content from the given page number
 			},
 			onContentAdded: function(contentPageNumber, $content){
 				// Called when content is added to one of the page wrappers
 			},
-			onAllPagesAdded: function(contentPageNumber, $content){
+			onAllPagesAdded: function(){
 				// Called when content all the pages have been successfully added
 			}
 		}, data);
@@ -141,7 +151,14 @@ $(document).ready(function() {
 		
 		pageTypes: {},
 		
+		pageObservers: {},
+
 		currentPageType: undefined, // Page type name
+		
+		current: function(){
+			if(typeof this.currentPageType === "undefined") return undefined;
+			return this.pageTypes[this.currentPageType];
+		},
 		
 		currentPageNumber: -1, // Current page number
 		maxNumberOfPages: -1, // Maximum number of pages
@@ -167,21 +184,27 @@ $(document).ready(function() {
 					$currentPageContent.addClass('AntiPagination_page').addClass('AntiPagination_currentPage').addClass('AntiPagination_p' + this.currentPageNumber).attr('data-antipagination-page', this.currentPageNumber);
 					var currentPageContentTag = $currentPageContent.prop("tagName");
 					
-					var changeEvent = function(event){
-						$(this).unbind(event);
-						AntiPagination.contentAdded(parseInt($(this).attr('data-antipagination-page')));
+					
+					var mutationChangeEvent = function(mutations) {
+						mutations.forEach(function(mutation) {
+							AntiPagination.contentAdded(parseInt($(mutation.target).attr('data-antipagination-page')));
+						});
+						this.disconnect();
 					};
+					
 					
 					for(var i = 1; i < this.currentPageNumber; i++){
 						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.before($newDiv);
-						$newDiv.bind("DOMSubtreeModified", changeEvent);
+						this.pageObservers[i] = new MutationObserver(mutationChangeEvent);
+						this.pageObservers[i].observe($newDiv[0], {childList: true});
 					}
 					
 					for(var i = this.maxNumberOfPages; i > this.currentPageNumber; i--){
 						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.after($newDiv);
-						$newDiv.bind("DOMSubtreeModified", changeEvent);
+						this.pageObservers[i] = new MutationObserver(mutationChangeEvent);
+						this.pageObservers[i].observe($newDiv[0], {childList: true});
 					}
 					
 					this.RemovePagination();
@@ -189,9 +212,9 @@ $(document).ready(function() {
 			}
 			
 			// Delay adding settings
-			setTimeout(function(){
-				AntiPagination.settings.addModal();
-			}, 100);
+			//setTimeout(function(){
+				//AntiPagination.settings.addModal();
+			//}, 100);
 		},
 		
 		add: function(obj){
@@ -221,11 +244,12 @@ $(document).ready(function() {
 				var args = Array.prototype.slice.call(arguments, 2);
 				
 				return this.pageTypes[typeName][fName].apply(this.pageTypes[typeName], args);
-				
 			}catch(e){
-				console.log('Error: ', e);
-				return undefined;
+				console.log('Error callMethod: ', e);
+				
 			}
+			
+			return undefined;
 
 		},
 		
@@ -243,7 +267,7 @@ $(document).ready(function() {
 			if(typeof this.currentPageType !== "undefined" && this.currentPageNumber > -1 && this.maxNumberOfPages > -1){
 					for(var i = 1; i <= this.maxNumberOfPages; i++){
 						if(i != this.currentPageNumber){
-							this.callMethod('addPageContent', this.currentPageType, this.currentURL, this.currentPageNumber, i);
+							this.callMethod('addPageContent', this.currentPageType, this.currentURL, this.currentPageNumber, i, $('.AntiPagination_page[data-antipagination-page="'+i+'"]') );
 						}
 					}
 			}
@@ -348,14 +372,14 @@ AntiPagination.add({
 		$('.post-content').addClass('AntiPagination_currentPage');
 		return $('.post-content');
 	},
-	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber, $target){
 		console.log('addPageContent', contentPageNumber);
 		var urlHTMLPatt = /(?:\/page\:\d+|\/){1}?$/gi;
 		if(!urlHTMLPatt.test(currentURL))
 			currentURL = currentURL + '/';
 		var newURL = currentURL.replace(urlHTMLPatt, "/page:" + contentPageNumber);
 		newURL += ' .post-content > *';
-		$(".AntiPagination_p" + contentPageNumber).load(newURL, function(){});
+		$target.load(newURL, function(){});
 	},
 	onAllPagesAdded: function(){
 		console.log('onAllPagesAdded!');
@@ -398,14 +422,14 @@ AntiPagination.add({
 		$('#safePlace .body > section:first').addClass('AntiPagination_currentPage');
 		return $('#safePlace .body > section:first');
 	},
-	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber, $target){
 		var urlHTMLPatt = /((?:_p\d+)?\.html)\s*$/gi;
 		
 		var newURL = currentURL.replace(urlHTMLPatt, "_p" + contentPageNumber + ".html");
 		
 		newURL += ' #safePlace .body > section:first > *';
 		
-		$(".AntiPagination_p" + contentPageNumber).load(newURL, function(){});
+		$target.load(newURL, function(){});
 		
 	},
 	onContentAdded: function(contentPageNumber, $content){
@@ -460,14 +484,15 @@ AntiPagination.add({
 		$('#safePlace .body > section:first').addClass('AntiPagination_currentPage');
 		return $('#safePlace .body > section:first');
 	},
-	addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+	addPageContent: function(currentURL, currentPageNumber, contentPageNumber, $target){
 		var urlHTMLPatt = /((?:_p\d+)?\/)\s*$/gi;
 		
 		var newURL = currentURL.replace(urlHTMLPatt, "_p" + contentPageNumber + "/");
 		
 		newURL += ' #safePlace .body > section:first > *';
 		
-		$(".AntiPagination_p" + contentPageNumber).load(newURL, function(){});
+		//$(".AntiPagination_p" + contentPageNumber).load(newURL, function(){});
+		$target.load(newURL, function(){});
 		
 	},
 	onContentAdded: function(contentPageNumber, $content){
@@ -512,4 +537,5 @@ AntiPagination.add({
 	console.log('caught error', e.stack);
 	MUJS.ERROR.processError(e);
 }
+
 //}

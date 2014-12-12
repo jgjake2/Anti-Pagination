@@ -12,7 +12,9 @@
 // @require          http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require          http://myuserjs.org/API/0.0.6/MUJS.js
 {{{REQUIRES}}}
-// @version          0.0.11
+// @version          0.0.12
+// @history          (0.0.12) Added $target to addPageContent parameters
+// @history          (0.0.12) Changed mutation events to page observers
 // @history          (0.0.11) Updated API version
 // @history          (0.0.11) Minor script improvements
 // @history          (0.0.10) Removed settings for now
@@ -48,20 +50,21 @@ try{
 //console.log('GM_info', GM_info);
 
 // Object containing information about the current script
-var script_info = MUJS.getScriptInfo({
+MUJS({
 	'ginfo': GM_info,
 	'has_GM_info': (typeof GM_info !== "undefined" ? true : false),
 	'has_GM_getMetadata': (typeof GM_getMetadata !== "undefined" ? true : false)
 });
 
-console.log('newScriptInfo', script_info);
+//console.log('newScriptInfo', script_info);
 
-MUJS.config('script.username', 'jgjake2'); // Set Script Owner's Name
-MUJS.config('script.script_name', 'Anti-Pagination'); // Set Script Name
-MUJS.config('Update.script_info', script_info); // Set script info data
-MUJS.config('Update.getType', 'data'); // Set the update data return type
-MUJS.config('Update.DOMTiming', true); // Enable reporting of timing information
-//MUJS.config('Error.autoReportErrors', true); // Enable reporting of timing information
+MUJS('set', 'script.username', 'jgjake2'); // Set Script Owner's Name
+MUJS('set', 'script.script_name', 'Anti-Pagination'); // Set Script Name
+MUJS('set', 'Update.getType', 'data'); // Set the update data return type
+MUJS('set', 'Update.DOMTiming', true); // Enable reporting of timing information
+MUJS('set', 'Error.autoReportErrors', true); // Enable reporting of timing information
+//MUJS.config('Update.getStats', true);
+MUJS('set', 'Update.XMLHttpRequest', true);
 //MUJS.config('debug', true);
 
 // Callback function for update check
@@ -69,15 +72,23 @@ var updateCallback = function(result){
 	console.log('updateCallback ', result);
 }
 
-{{{DEBUG_ONLY}}}
-	// Create error test
-	var bar = undefined;
-	var foo = bar(taco, bell);
-{{{\DEBUG_ONLY}}}
+
 
 function getMUJSUpdate(){
 	//console.log('getMUJSUpdate');
+{{{DEBUG_ONLY}}}
 
+try{
+	// Create error test
+	//var bar = undefined;
+	//var foo = bar(taco, bell);
+	var foo = eval('FAIL');
+} catch(e) {
+	//console.log('caught error - getMUJSUpdate', e.stack);
+	MUJS.ERROR.processError(e);
+}
+
+{{{\DEBUG_ONLY}}}
 
 	var opts = {
 		callback: updateCallback,
@@ -89,11 +100,14 @@ function getMUJSUpdate(){
 	if(scriptLoadTime > -1)
 		opts.args.scriptLoadTime = scriptLoadTime;
 		
-		
+	//console.log(MUJS.UPDATE.getURL(opts));	
+	//MUJS.UPDATE.getUpdateData(opts);
 {{{RELEASE_ONLY}}}
 	// Initiate update check and send args to the collection engine
 	MUJS.UPDATE.getUpdateData(opts);
+	
 {{{\RELEASE_ONLY}}}
+
 }
 
 // ToDo:
@@ -129,13 +143,13 @@ $(document).ready(function() {
 			getCurrentPageContent: function(currentURL){
 				// Get the content of the current page as a jQuery object
 			},
-			addPageContent: function(currentURL, currentPageNumber, contentPageNumber){
+			addPageContent: function(currentURL, currentPageNumber, contentPageNumber, $target){
 				// Get and return the content from the given page number
 			},
 			onContentAdded: function(contentPageNumber, $content){
 				// Called when content is added to one of the page wrappers
 			},
-			onAllPagesAdded: function(contentPageNumber, $content){
+			onAllPagesAdded: function(){
 				// Called when content all the pages have been successfully added
 			}
 		}, data);
@@ -145,7 +159,14 @@ $(document).ready(function() {
 		
 		pageTypes: {},
 		
+		pageObservers: {},
+
 		currentPageType: undefined, // Page type name
+		
+		current: function(){
+			if(typeof this.currentPageType === "undefined") return undefined;
+			return this.pageTypes[this.currentPageType];
+		},
 		
 		currentPageNumber: -1, // Current page number
 		maxNumberOfPages: -1, // Maximum number of pages
@@ -171,21 +192,27 @@ $(document).ready(function() {
 					$currentPageContent.addClass('AntiPagination_page').addClass('AntiPagination_currentPage').addClass('AntiPagination_p' + this.currentPageNumber).attr('data-antipagination-page', this.currentPageNumber);
 					var currentPageContentTag = $currentPageContent.prop("tagName");
 					
-					var changeEvent = function(event){
-						$(this).unbind(event);
-						AntiPagination.contentAdded(parseInt($(this).attr('data-antipagination-page')));
+					
+					var mutationChangeEvent = function(mutations) {
+						mutations.forEach(function(mutation) {
+							AntiPagination.contentAdded(parseInt($(mutation.target).attr('data-antipagination-page')));
+						});
+						this.disconnect();
 					};
+					
 					
 					for(var i = 1; i < this.currentPageNumber; i++){
 						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.before($newDiv);
-						$newDiv.bind("DOMSubtreeModified", changeEvent);
+						this.pageObservers[i] = new MutationObserver(mutationChangeEvent);
+						this.pageObservers[i].observe($newDiv[0], {childList: true});
 					}
 					
 					for(var i = this.maxNumberOfPages; i > this.currentPageNumber; i--){
 						var $newDiv = $("<" + currentPageContentTag + ">", {class: "AntiPagination_page AntiPagination_p" + i, "data-antipagination-page": i});
 						$currentPageContent.after($newDiv);
-						$newDiv.bind("DOMSubtreeModified", changeEvent);
+						this.pageObservers[i] = new MutationObserver(mutationChangeEvent);
+						this.pageObservers[i].observe($newDiv[0], {childList: true});
 					}
 					
 					this.RemovePagination();
@@ -193,9 +220,9 @@ $(document).ready(function() {
 			}
 			
 			// Delay adding settings
-			setTimeout(function(){
-				AntiPagination.settings.addModal();
-			}, 100);
+			//setTimeout(function(){
+				//AntiPagination.settings.addModal();
+			//}, 100);
 		},
 		
 		add: function(obj){
@@ -225,11 +252,12 @@ $(document).ready(function() {
 				var args = Array.prototype.slice.call(arguments, 2);
 				
 				return this.pageTypes[typeName][fName].apply(this.pageTypes[typeName], args);
-				
 			}catch(e){
-				console.log('Error: ', e);
-				return undefined;
+				console.log('Error callMethod: ', e);
+				
 			}
+			
+			return undefined;
 
 		},
 		
@@ -247,7 +275,7 @@ $(document).ready(function() {
 			if(typeof this.currentPageType !== "undefined" && this.currentPageNumber > -1 && this.maxNumberOfPages > -1){
 					for(var i = 1; i <= this.maxNumberOfPages; i++){
 						if(i != this.currentPageNumber){
-							this.callMethod('addPageContent', this.currentPageType, this.currentURL, this.currentPageNumber, i);
+							this.callMethod('addPageContent', this.currentPageType, this.currentURL, this.currentPageNumber, i, $('.AntiPagination_page[data-antipagination-page="'+i+'"]') );
 						}
 					}
 			}
@@ -330,4 +358,5 @@ $(document).ready(function() {
 	console.log('caught error', e.stack);
 	MUJS.ERROR.processError(e);
 }
+
 //}
